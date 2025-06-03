@@ -1,0 +1,618 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+//tôi muốn timf pt dưới 10m2 ở phương an hai bac có gia dưới 500k
+//Lưu ý
+// npx prisma migrate dev --name init : Tạo migration.sql
+// npx prisma db push : Nếu chỉ cần cập nhật database mà không tạo migration
+// npx prisma migrate
+// npx prisma studio
+
+// rm -rf node_modules
+// rm package-lock.json
+// npm install
+// rafce
+
+// Lưu ý
+  // ? có thể có giá trị null
+  // nhiều ở bên nào thì @relation(fields: [ToaNhaId], references: [id]) ở bên đó
+// ToaNha ToaNha @relation(fields: [ToaNhaId], references: [id]) : Phải có tòa nhà trước mới có thể tạo bảng khác
+// ToaNhas ToaNha[]: ko cần phải có tòa nhà vẫn tạo bảng trc đc
+
+
+
+//Phòng Trọ
+model PhongTro{
+  id Int @id @default(autoincrement())
+  tenPhong String @db.VarChar(45)
+  tang Int
+  kichThuoc Float
+  giaPhong Float
+  soNguoiToiDa Int
+  ToaNha ToaNha @relation(fields: [ToaNhaId], references: [id])
+  ToaNhaId Int
+  HinhAnhPhongTros HinhAnhPhongTro[]
+  TinhTrangPhong PhongTro_TinhTrangPhong[]
+  loaiPhongId Int?
+  loaiPhong   LoaiPhong? @relation(fields: [loaiPhongId], references: [id])
+  DanhSachDichVus PhongTro_DanhSachDichVu[]
+  KhuyenMais ChiTietKhuyenMai[]
+  ThietBis PhongTro_ThietBi[]
+  DanhGias DanhGia[]
+  ChiTietHopDongs ChiTietHopDong[]
+  DanhSachSuCos DanhSachSuCo[]
+  QuanLyPhongTros QuanLyPhongTro[]
+  BaoTriPhongTros BaoTriPhongTro[]
+  PhanHoi_PhongTros PhanHoi_PhongTro[]
+  LichSuThayDoiPhongs LichSuThayDoiPhong[]
+}
+// KHÁCH HÀNG
+model KhachHang{
+  id Int @id @default(autoincrement())
+  hoTen String @db.VarChar(255)
+  ngaySinh DateTime
+  cccd String @unique
+  diaChi String @db.VarChar(255)
+  soDienThoai String @db.VarChar(255)
+  email String @db.VarChar(255)
+  ChiTietDanhGias ChiTietDanhGia[]
+  PhuongTienDiChuyens PhuongTienDiChuyen[]
+  PhanHois PhanHoi[]
+  LichSuSuDungDichVus LichSuSuDungDichVu[]
+  ChamSocKhachHangs ChamSocKhachHang[]
+  ThongBao KhachHang_ThongBao[]
+  QuanLyKhachHangs QuanLyKhachHang[]
+  HoaDons HoaDon[]
+  HopDongs HopDong[]
+}
+//PhongTro
+model DonViHanhChinh{
+  id Int @id @default(autoincrement())
+  tenDonVi String @db.VarChar(255)
+  idCha Int?
+  ToaNhas ToaNha[]
+}
+model HopDongBaoHiem{
+   id Int @id @default(autoincrement())
+   nhaCungCap String @db.VarChar(255)
+   noiDung String @db.Text
+   ngayBatDau DateTime
+   ngayKetThuc DateTime
+   ToaNha ToaNha @relation(fields: [ToaNhaId], references: [id])
+   ToaNhaId Int
+}
+model ToaNha{
+  id Int @id @default(autoincrement()) 
+  tenToaNha String @db.VarChar(255)
+  diaChi String @db.VarChar(255)
+  soTang Int
+  PhongTros PhongTro[]
+  HopDongBaoHiems HopDongBaoHiem[]
+  DonViHanhChinh DonViHanhChinh @relation(fields: [DonViHanhChinhId], references: [id])
+  DonViHanhChinhId Int
+}
+model HinhAnhPhongTro{
+  id Int @id @default(autoincrement())
+  moTa String @db.Text
+  hinhAnh String @db.VarChar(255) 
+  PhongTro PhongTro @relation(fields: [PhongTroId], references: [id])
+  PhongTroId Int
+}
+
+model TinhTrangPhong{
+  id Int @id @default(autoincrement())
+  tinhTrang String @db.VarChar(255)
+  ngayCapNhat DateTime
+  PhongTros PhongTro_TinhTrangPhong[]
+}
+model PhongTro_TinhTrangPhong {
+  phongTro           PhongTro        @relation(fields: [phongTroId], references: [id])
+  phongTroId         Int
+  tinhTrangPhong     TinhTrangPhong @relation(fields: [tinhTrangPhongId], references: [id])
+  tinhTrangPhongId   Int
+
+  @@id([phongTroId, tinhTrangPhongId])
+  @@map("PhongTro_TinhTrangPhong") // map đúng tên bảng trong DB nếu bạn không muốn đổi tên bảng thật
+}
+
+model LoaiPhong{
+  id Int @id @default(autoincrement())
+  tenLoaiPhong String @db.VarChar(255)
+  moTa String @db.Text
+  giaCoBan Float
+  PhongTro PhongTro[]
+
+}
+model DanhSachDichVu{
+  id Int @id @default(autoincrement())
+  tenDichVu String @db.VarChar(255)
+  dacTa String @db.Text
+  isActive Boolean @default(true)
+  PhongTros PhongTro_DanhSachDichVu[]
+  LichSuSuDungDichVu LichSuSuDungDichVu[]
+}
+model PhongTro_DanhSachDichVu{
+  soLuong Int
+  loaiDichVu String @db.VarChar(255)
+  ghiChu String @db.Text
+  PhongTro PhongTro @relation(fields: [PhongTroId], references: [id])
+  PhongTroId Int
+  DanhSachDichVu DanhSachDichVu @relation(fields: [DanhSachDichVuId],references: [id])
+  DanhSachDichVuId Int
+  @@id([PhongTroId, DanhSachDichVuId])
+
+}
+model ChiTietKhuyenMai{
+  loaiKhuyenMai String @db.VarChar(50)
+  phantram Float
+  PhongTro PhongTro @relation(fields: [PhongTroId], references: [id])
+  PhongTroId Int
+  KhuyenMai KhuyenMai @relation(fields: [KhuyenMaiId], references: [id])
+  KhuyenMaiId Int
+  @@id([PhongTroId, KhuyenMaiId])
+}
+model KhuyenMai{
+  id Int @id @default(autoincrement())
+  tenKhuyenMai String @db.VarChar(255)
+  moTa String @db.Text
+  phanTramGiamGia Float
+  ngayBatDau DateTime
+  ngayKetThuc DateTime
+  PhongTros ChiTietKhuyenMai[]
+
+}
+// QuanLyThietBi
+
+model PhongTro_ThietBi{
+  soLuong Int
+  tinhTrang String @db.VarChar(255)
+  PhongTro PhongTro @relation(fields: [PhongTroId], references: [id])
+  PhongTroId Int
+  ThietBi ThietBi @relation(fields: [ThietBiId],references: [id])
+  ThietBiId Int
+  @@id([PhongTroId, ThietBiId])
+}
+model ThietBi{
+  id Int @id @default(autoincrement())
+  tenThietBi String @db.VarChar(255)
+  loaiThietBi String @db.VarChar(255)
+  soLuong Int
+  PhongTros PhongTro_ThietBi[]
+  Khos Kho_ThietBi[]
+  SuaChuaThietBi ChiTietSuaChua[]
+}
+model Kho_ThietBi{
+  soLuong Int
+  ghiChu String @db.Text
+  ThietBi ThietBi @relation(fields: [ThietBiId],references: [id])
+  ThietBiId Int
+  Kho Kho @relation(fields: [KhoId],references: [id])
+  KhoId Int
+   @@id([ThietBiId, KhoId])
+
+}
+model Kho{
+  id Int @id @default(autoincrement())
+  tenKho String @db.VarChar(255)
+  diaChi String @db.VarChar(255)
+  sucChua String @db.VarChar(255)
+  ThietBi Kho_ThietBi[]
+  QuanLyKhoS QuanLyKho[]
+
+}
+model QuanLyKho{
+  id Int @id @default(autoincrement())
+  ngayBatDau DateTime
+  ngayKetThuc DateTime
+  Kho Kho @relation(fields: [KhoId],references: [id])
+  KhoId Int
+  NhanVien NhanVien @relation(fields: [NhanVienId],references: [id])
+  NhanVienId Int 
+
+}
+model ChiTietSuaChua{
+  tenSuaChua String @db.VarChar(255)
+  soTien Float
+  ThietBi ThietBi @relation(fields: [ThietBiId],references: [id])
+  ThietBiId Int
+  SuaChuaThietBi SuaChuaThietBi @relation(fields: [SuaChuaThietBiId],references: [id])
+  SuaChuaThietBiId Int
+  @@id([ThietBiId, SuaChuaThietBiId])
+}
+model SuaChuaThietBi{
+  id Int @id @default(autoincrement())
+  tenSuaChua String @db.VarChar(255)
+  tenNhanVien String? @db.VarChar(255)
+  ThietBi ChiTietSuaChua[]
+  NhanVien NhanVien_SuaChuaThietBi[]
+}
+
+model NhanVien_SuaChuaThietBi{
+   SuaChuaThietBi SuaChuaThietBi @relation(fields: [SuaChuaThietBiId],references: [id])
+   SuaChuaThietBiId Int
+  NhanVien NhanVien @relation(fields: [NhanVienId], references: [id])
+  NhanVienId Int
+  @@id([NhanVienId, SuaChuaThietBiId])
+
+}
+
+//KhachHang_PhongTro
+model GiaHanHopDong {
+  id Int @id @default(autoincrement())
+  ngayGiaHan DateTime
+  ngayKetThuc DateTime
+  HopDong HopDong @relation(fields: [HopDongId], references: [id])
+  HopDongId Int 
+}
+model HopDong {
+  id Int @id @default(autoincrement())
+  ngayBatDau DateTime
+  ngayKetThuc DateTime
+  tienDaCoc Float
+  tongTien Float
+  noiDung String @db.Text
+  ghiChu String @db.Text
+  GiaHanHopDongs GiaHanHopDong[]
+  LichSuThayDoiPhongs LichSuThayDoiPhong[]
+  ChiTietHopDongs ChiTietHopDong[]
+  KhachHang   KhachHang @relation(fields: [KhachHangId], references: [id])
+  KhachHangId Int
+}
+model ChiTietHopDong{
+  // ngayBatDau DateTime
+  // ngayKetThuc DateTime
+  // dieuKhoan String @db.Text
+  // ghiChu String @db.Text
+  //Hop Dong
+  HopDong HopDong @relation(fields: [HopDongId],references: [id])
+  HopDongId Int
+  //Phòng Trọ
+  PhongTro PhongTro @relation(fields: [PhongTroId], references: [id])
+  PhongTroId Int
+  @@id([HopDongId, PhongTroId])
+}
+model LichSuThayDoiPhong{
+  id Int @id @default(autoincrement())
+  idPhongCu Int
+  ngayChuyen DateTime
+  donGia Float
+  ghiChu String @db.Text
+  HopDong HopDong @relation(fields: [HopDongId],references: [id])
+  HopDongId Int
+  PhongTro PhongTro @relation(fields: [PhongTroId], references: [id])
+  PhongTroId Int
+}
+model DanhGia{
+  id Int @id @default(autoincrement())
+  noiDung String @db.VarChar(255)
+  ngayDanhGia DateTime
+  soSao Int
+  PhongTro PhongTro @relation(fields: [PhongTroId], references: [id])
+  PhongTroId Int
+  ChiTietDanhGias ChiTietDanhGia[]
+}
+model ChiTietDanhGia{
+  DanhGia DanhGia @relation(fields: [DanhGiaId],references: [id])
+  DanhGiaId Int
+  KhachHang KhachHang @relation(fields: [KhachHangId],references: [id])
+  KhachHangId Int
+  @@id([DanhGiaId, KhachHangId])
+
+}
+model PhanHoi_PhongTro{
+  PhanHoi PhanHoi @relation(fields: [PhanHoiId],references: [id])
+  PhanHoiId Int
+  PhongTro PhongTro @relation(fields: [PhongTroId],references: [id])
+  PhongTroId Int
+  @@id([PhanHoiId, PhongTroId])
+}
+//QuanLyKhachHang
+model PhuongTienDiChuyen{
+  id Int @id @default(autoincrement())
+  loaiPhuongTien String @db.VarChar(255)
+  bienSo String @db.VarChar(255)
+  soLuong Int 
+  KhachHang KhachHang @relation(fields: [KhachHangId],references: [id])
+  KhachHangId Int
+
+}
+model HoaDon{
+  id Int @id @default(autoincrement())
+  ngayLap DateTime
+  loaiHoaDon String @db.VarChar(255)
+  tinhTrang String @db.VarChar(255)
+  soTien Decimal
+  LichSuThanhToan LichSuThanhToan? @relation(fields: [LichSuThanhToanId],references: [id])
+  LichSuThanhToanId Int? 
+  KhachHang   KhachHang @relation(fields: [KhachHangId], references: [id])
+  KhachHangId Int
+}
+
+model PhuongThucThanhToan{
+  id Int @id @default(autoincrement())
+  loaiGiaoDich String @db.VarChar(255)
+  moTa String @db.Text
+  ghiChu String @db.Text
+  LichSuThanhToan LichSuThanhToan @relation(fields: [LichSuThanhToanId],references: [id])
+  LichSuThanhToanId Int
+}
+model LichSuThanhToan{
+  id Int @id @default(autoincrement())
+  ngayThanhToan DateTime
+  soTien Float
+  PhuongThucThanhToan PhuongThucThanhToan[]
+  HoaDons HoaDon[]
+}
+model PhanHoi{
+  id Int @id @default(autoincrement())
+  noiDung String @db.Text
+  // loaiPhanHoi String @db.Text
+  ngayPhanHoi DateTime
+  trangThai Boolean
+  KhachHang KhachHang @relation(fields: [KhachHangId],references: [id])
+  KhachHangId Int
+  PhanHoiNhanVien PhanHoiNhanVien[]
+  PhanHoi_PhongTro PhanHoi_PhongTro[]
+  
+}
+
+
+//KhachHang_NhanVien
+model LichSuSuDungDichVu{
+  id Int @id @default(autoincrement())
+  ngaySuDung DateTime
+  soLuong Int
+  thanhTien Float
+  KhachHang KhachHang @relation(fields: [KhachHangId],references: [id])
+  KhachHangId Int
+  NhanVien NhanVien @relation(fields: [NhanVienId],references: [id])
+  NhanVienId Int
+  DanhSachDichVu DanhSachDichVu[]
+
+}
+model ChamSocKhachHang{
+  id Int @id @default(autoincrement())
+  ngayHoTro DateTime
+  loaiHoTro String @db.VarChar(255)
+  tenHoTro String @db.VarChar(255)
+  KhachHang KhachHang @relation(fields: [KhachHangId],references: [id])
+  KhachHangId Int
+  NhanVien NhanVien @relation(fields: [NhanVienId],references: [id])
+  NhanVienId Int
+}
+model KhachHang_ThongBao{
+  KhachHang KhachHang @relation(fields: [KhachHangId],references: [id])
+  KhachHangId Int
+  ThongBao ThongBao @relation(fields: [ThongBaoId], references: [id])
+  ThongBaoId Int
+  @@id([KhachHangId, ThongBaoId])
+}
+model ThongBao{
+  id Int @id @default(autoincrement())
+  tieuDe String @db.VarChar(255)
+  noiDung String @db.Text
+  ngayThongBao DateTime
+  KhachHang KhachHang_ThongBao[]
+  NhanVien NhanVien_ThongBao[]
+
+}
+model NhanVien_ThongBao{
+  NhanVien NhanVien @relation(fields: [NhanVienId],references: [id])
+  NhanVienId Int
+  ThongBao ThongBao @relation(fields: [ThongBaoId],references: [id])
+  ThongBaoId Int
+  @@id([NhanVienId, ThongBaoId])
+}
+model QuanLyKhachHang{
+  id Int @id @default(autoincrement())
+  ghiChu String @db.VarChar(255)
+  KhachHang KhachHang @relation(fields: [KhachHangId],references: [id])
+  KhachHangId Int
+  NhanVien NhanVien @relation(fields: [NhanVienId], references: [id])
+  NhanVienId Int
+}
+model PhanHoiNhanVien{
+  id Int @id @default(autoincrement())
+  // ngayPhanHoi DateTime
+  // trangThai Boolean
+  PhanHoi PhanHoi @relation(fields: [PhanHoiId],references: [id])
+  PhanHoiId Int
+  XuLyPhanHois XuLyPhanHoi[]
+}
+model XuLyPhanHoi{
+  id Int @id @default(autoincrement())
+  ngayXuLy DateTime
+  noiDungPhanHoi String @db.VarChar(255)
+  ghiChu String @db.VarChar(255)
+  PhanHoiNhanVien PhanHoiNhanVien @relation(fields: [PhanHoiNhanVienId],references: [id])
+  PhanHoiNhanVienId Int
+  NhanVien NhanVien @relation(fields: [NhanVienId], references: [id])
+  NhanVienId Int
+}
+//PhongTro_NhanVien
+
+model DanhSachSuCo{
+  id Int @id @default(autoincrement())
+  tenSuCo String @db.VarChar(255)
+  soLuong Int
+  ngayBaoCao DateTime
+  ngayXuLy DateTime
+  ngayKetThuc DateTime
+  tinhTrang String @db.VarChar(255)
+  moTa String @db.Text
+  PhongTro PhongTro @relation(fields: [PhongTroId], references: [id])
+  PhongTroId Int
+  XuLySuCos XuLySuCo[]
+}
+model XuLySuCo{
+  id Int @id @default(autoincrement())
+  trangThai Boolean
+  DanhSachSuCo DanhSachSuCo @relation(fields: [DanhSachSuCoId],references: [id])
+  DanhSachSuCoId Int
+  NhanVien NhanVien @relation(fields: [NhanVienId], references: [id])
+  NhanVienId Int
+}
+model BaoTriPhongTro{
+  id Int @id @default(autoincrement())
+  loaiBaoTri String @db.VarChar(255)
+  tenBaoTri String @db.VarChar(255)
+  ngayBaoTri DateTime
+  tenNhanVien String @db.VarChar(255)
+  PhongTro PhongTro @relation(fields: [PhongTroId], references: [id])
+  PhongTroId Int
+  NhanVien NhanVien @relation(fields: [NhanVienId], references: [id])
+  NhanVienId Int
+
+}
+model QuanLyPhongTro{
+  id Int @id @default(autoincrement())
+  ngayBatDau DateTime
+  ngayKetThuc DateTime
+  PhongTro PhongTro @relation(fields: [PhongTroId], references: [id])
+  PhongTroId Int
+  NhanVien NhanVien @relation(fields: [NhanVienId], references: [id])
+  NhanVienId Int
+}
+
+model HopDongNhanVien{
+  id Int @id @default(autoincrement())
+  // hoTen String @db.VarChar(255)
+  ngayBatDau DateTime
+  ngayKetThuc DateTime
+  luongCoBan Decimal
+  ghiChu String @db.VarChar(255)
+  NhanVien NhanVien @relation(fields: [NhanVienId], references: [id])
+  NhanVienId Int
+  ChiTietHopDongNhanViens ChiTietHopDongNhanVien[]
+
+}
+model ChiTietHopDongNhanVien {
+  id Int @id @default(autoincrement())
+  // ngayBatDau DateTime
+  // ngayKetThuc DateTime
+  HopDongNhanVien HopDongNhanVien @relation(fields: [HopDongNhanVienId], references: [id])
+  HopDongNhanVienId Int
+  GiaHanHopDongNhanViens GiaHanHopDongNhanVien[]
+}
+model GiaHanHopDongNhanVien {
+  id Int @id @default(autoincrement())
+  ngayGiaHan DateTime
+  ngayKetThuc DateTime
+  dieuKhoan String @db.VarChar(255)
+  ChiTietHopDongNhanVien ChiTietHopDongNhanVien @relation(fields: [ChiTietHopDongNhanVienId], references: [id])
+  ChiTietHopDongNhanVienId Int
+}
+model NhanVien_ChucVu{
+  ngayBatDau DateTime
+  ngayKetThuc DateTime
+  NhanVien NhanVien @relation(fields: [NhanVienId], references: [id])
+  NhanVienId Int
+  ChucVu ChucVu @relation(fields: [ChucVuId],references: [id])
+  ChucVuId Int
+  @@id([NhanVienId, ChucVuId])
+
+}
+model ChucVu{
+  id Int @id @default(autoincrement())
+  hoTen String @db.VarChar(255)
+  tenChucVu String @db.VarChar(255)
+  loaiChucVu String @db.VarChar(255)
+  ngayBatDau DateTime
+  ngayKetThuc DateTime
+  NhanVien NhanVien_ChucVu[]
+}
+model NhanVien_LichLamViec{
+  NhanVien NhanVien @relation(fields: [NhanVienId], references: [id])
+  NhanVienId Int
+  LichLamViec LichLamViec @relation(fields: [LichLamViecId], references: [id])
+  LichLamViecId Int
+  @@id([NhanVienId, LichLamViecId])
+}
+model LichLamViec{
+  id Int @id @default(autoincrement())
+  ngayLamViec DateTime
+  caLam String @db.VarChar(255)
+  ghiChu String @db.Text
+  NhanVien NhanVien_LichLamViec[]
+  Luongs Luong[]
+}
+model Luong{
+  id Int @id @default(autoincrement())
+  hoTen String @db.VarChar(255)
+  LichLamViec LichLamViec @relation(fields: [LichLamViecId],references: [id])
+  LichLamViecId Int
+  BangChamCong BangChamCong @relation(fields: [BangChamCongId],references: [id])
+  BangChamCongId Int
+  ChiTraLuongs ChiTraLuong[]
+}
+model BangChamCong{
+  id Int @id @default(autoincrement())
+  ngayChamCong DateTime
+  soGioLam Int
+  trangThai String @db.VarChar(255)
+  NhanVien NhanVien @relation(fields: [NhanVienId], references: [id])
+  NhanVienId Int
+  Luongs Luong[]
+  
+}
+model NhanVien_ChiTraLuong{
+  NhanVien NhanVien @relation(fields: [NhanVienId], references: [id])
+  NhanVienId Int
+  ChiTraLuong ChiTraLuong @relation(fields: [ChiTraLuongId],references: [id])
+  ChiTraLuongId Int
+  @@id([NhanVienId, ChiTraLuongId])
+}
+model ChiTraLuong{
+  id Int @id @default(autoincrement())
+  soTien Float
+  ngayPhatLuong DateTime
+  NhanVien NhanVien_ChiTraLuong[]
+  LichSuChiTraLuongs LichSuChiTraLuong[]
+  Luong Luong @relation(fields: [LuongId],references: [id])
+  LuongId Int
+}
+model LichSuChiTraLuong{
+  id Int @id @default(autoincrement())
+  ghiChu String @db.Text
+  ChiTraLuong ChiTraLuong @relation(fields: [ChiTraLuongId],references: [id])
+  ChiTraLuongId Int
+}
+
+// QuanLyNhanVien
+model NhanVien{
+  id Int @id @default(autoincrement())
+  hoTen String @db.VarChar(255)
+  ngaySinh DateTime
+  gioiTinh Boolean
+  soDienThoai String @db.VarChar(255)
+  email String @db.VarChar(255)
+  diaChi String @db.VarChar(255)
+  QuanLyKho QuanLyKho[]
+  HopDongNhanViens HopDongNhanVien[]
+  ChucVu NhanVien_ChucVu[]
+  LichLamViec NhanVien_LichLamViec[]
+  BangChamCongs BangChamCong[]
+  ChiTraLuong NhanVien_ChiTraLuong[]
+  SuaChuaThietBi NhanVien_SuaChuaThietBi[]
+  XuLySuCo XuLySuCo []
+  BaoTriPhongTros BaoTriPhongTro []
+  QuanLyPhongTros QuanLyPhongTro[]
+  ThongBaos NhanVien_ThongBao[]
+  LichSuSuDungDichVus LichSuSuDungDichVu[]
+  ChamSocKhachHangs ChamSocKhachHang[]
+  QuanLyKhachHangs QuanLyKhachHang []
+  XuLyPhanHois XuLyPhanHoi[]
+}
+
+
+
+
