@@ -17,9 +17,21 @@ const TinhTrangPhongSchema = z.object({
 // tinhTrang String @db.VarChar(255)
 // ngayCapNhat DateTime
 export async function GET(req: NextRequest) {
+  const searchParams = await req.nextUrl.searchParams;
+  const limit: number = Number(searchParams.get("limit")) || 10;
+  const page: number = Number(searchParams.get("page")) || 1;
+
   try {
-    const TinhTrangPhong = await prisma.tinhTrangPhong.findMany({});
-    return NextResponse.json({ TinhTrangPhong }, { status: 200 });
+    const totalRecords = await prisma.tinhTrangPhong.count();
+    const totalPages = Math.ceil(totalRecords / limit);
+    const TinhTrangPhong = await prisma.tinhTrangPhong.findMany({
+      skip: (page - 1) * limit,
+      take: limit,
+    });
+    return NextResponse.json(
+      { TinhTrangPhong, extraInfo: { totalRecords, totalPages, page, limit } },
+      { status: 200 }
+    );
   } catch (error) {
     return NextResponse.json({ error: error }, { status: 400 });
   }

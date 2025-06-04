@@ -17,13 +17,24 @@ const ChiTietHopDongNhanVienSchema = z.object({
 //   }
 
 export async function GET(req: NextRequest) {
+  const searchParams = await req.nextUrl.searchParams;
+  const limit: number = Number(searchParams.get("limit")) || 10;
+  const page: number = Number(searchParams.get("page")) || 1;
+
   try {
+    const totalRecords = await prisma.bangChamCong.count();
+    const totalPages = Math.ceil(totalRecords / limit);
     const data = await prisma.chiTietHopDongNhanVien.findMany({
+      skip: (page - 1) * limit,
+      take: limit,
       include: {
         HopDongNhanVien: true,
       },
     });
-    return NextResponse.json({ data }, { status: 200 });
+    return NextResponse.json(
+      { data, extraInfo: { totalRecords, totalPages, page, limit } },
+      { status: 200 }
+    );
   } catch (error) {
     return NextResponse.json({ error: error }, { status: 400 });
   }
@@ -41,8 +52,8 @@ export async function POST(req: NextRequest) {
     }
     const newData = await prisma.chiTietHopDongNhanVien.create({
       data: {
-        ngayBatDau: success.data.ngayBatDau,
-        ngayKetThuc: success.data.ngayKetThuc,
+        // ngayBatDau: success.data.ngayBatDau,
+        // ngayKetThuc: success.data.ngayKetThuc,
         HopDongNhanVienId: success.data.HopDongNhanVienId,
       },
       include: {
@@ -64,8 +75,8 @@ export async function PUT(req: NextRequest) {
   try {
     const update = await prisma.chiTietHopDongNhanVien.updateMany({
       data: {
-        ngayBatDau: success.data.ngayBatDau,
-        ngayKetThuc: success.data.ngayKetThuc,
+        // ngayBatDau: success.data.ngayBatDau,
+        // ngayKetThuc: success.data.ngayKetThuc,
         HopDongNhanVienId: success.data.HopDongNhanVienId,
       },
     });

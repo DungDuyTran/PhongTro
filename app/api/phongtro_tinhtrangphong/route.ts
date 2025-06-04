@@ -16,15 +16,30 @@ const PhongTroTinhTrangSchema = z.object({
 // }
 
 export async function GET(req: NextRequest) {
+  const searchParams = await req.nextUrl.searchParams;
+  const limit: number = Number(searchParams.get("limit")) || 10;
+  const page: number = Number(searchParams.get("page")) || 1;
+
   try {
+    const totalRecords = await prisma.phongTro_TinhTrangPhong.count();
+    const totalPages = Math.ceil(totalRecords / limit);
+    const TinhTrangPhong = await prisma.tinhTrangPhong.findMany({});
     const phongtro_tinhtrangphong =
       await prisma.phongTro_TinhTrangPhong.findMany({
+        skip: (page - 1) * limit,
+        take: limit,
         include: {
           phongTro: true,
           tinhTrangPhong: true,
         },
       });
-    return NextResponse.json({ phongtro_tinhtrangphong }, { status: 200 });
+    return NextResponse.json(
+      {
+        phongtro_tinhtrangphong,
+        extraInfo: { totalRecords, totalPages, page, limit },
+      },
+      { status: 200 }
+    );
   } catch (error) {
     return NextResponse.json({ error: error }, { status: 400 });
   }

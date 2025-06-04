@@ -17,14 +17,25 @@ const XuLySuCoSchema = z.object({
 //   }
 
 export async function GET(req: NextRequest) {
+  const searchParams = await req.nextUrl.searchParams;
+  const limit: number = Number(searchParams.get("limit")) || 10;
+  const page: number = Number(searchParams.get("page")) || 1;
+
   try {
+    const totalRecords = await prisma.tinhTrangPhong.count();
+    const totalPages = Math.ceil(totalRecords / limit);
     const data = await prisma.xuLySuCo.findMany({
+      skip: (page - 1) * limit,
+      take: limit,
       include: {
         NhanVien: true,
         DanhSachSuCo: true,
       },
     });
-    return NextResponse.json({ data }, { status: 200 });
+    return NextResponse.json(
+      { data, extraInfo: { totalRecords, totalPages, page, limit } },
+      { status: 200 }
+    );
   } catch (error) {
     return NextResponse.json({ error: error }, { status: 400 });
   }

@@ -7,26 +7,22 @@ const DVHCSchema = z.object({
   tenDonVi: z.string().min(3),
 });
 
-// model DonViHanhChinh{
-//     id Int @id @default(autoincrement())
-//     tenDonVi String @db.VarChar(255)
-//     idCha Int?
-//     // 1 đơn vị hành chính có nhìu tòa nhà
-//     ToaNhas ToaNha[]
-//   }
-
-// GET: http://localhost:3000/api/donvihanhchinh
-// POST :
-// {
-//   "tenDonVi": "Ha Noi"
-// }
-
 export async function GET(req: NextRequest) {
+  const searchParams = await req.nextUrl.searchParams;
+  const limit: number = Number(searchParams.get("limit")) || 10;
+  const page: number = Number(searchParams.get("page")) || 1;
+
   try {
-    const DVHC = await prisma.donViHanhChinh.findMany();
+    const totalRecords = await prisma.tinhTrangPhong.count();
+    const totalPages = Math.ceil(totalRecords / limit);
+    const DVHC = await prisma.donViHanhChinh.findMany({
+      skip: (page - 1) * limit,
+      take: limit,
+    });
     return NextResponse.json(
       {
         DVHC: DVHC,
+        extraInfo: { totalRecords, totalPages, page, limit },
       },
       { status: 200 }
     );

@@ -19,13 +19,24 @@ const HopDongSchema = z.object({
 // }
 
 export async function GET(req: NextRequest) {
+  const searchParams = await req.nextUrl.searchParams;
+  const limit: number = Number(searchParams.get("limit")) || 10;
+  const page: number = Number(searchParams.get("page")) || 1;
+
   try {
+    const totalRecords = await prisma.tinhTrangPhong.count();
+    const totalPages = Math.ceil(totalRecords / limit);
     const hopDongs = await prisma.hopDongBaoHiem.findMany({
+      skip: (page - 1) * limit,
+      take: limit,
       include: {
         ToaNha: true,
       },
     });
-    return NextResponse.json({ hopDongs }, { status: 200 });
+    return NextResponse.json(
+      { hopDongs, extraInfo: { totalRecords, totalPages, page, limit } },
+      { status: 200 }
+    );
   } catch (error) {
     return NextResponse.json({ error }, { status: 500 });
   }

@@ -10,12 +10,6 @@ const ToaNhaSchema = z.object({
   DonViHanhChinhId: z.number().int().positive(),
 });
 
-// const ToaNhaSchema = z.object({
-//   tenToaNha: z.string().min(3),
-//   diaChi: z.string(),
-//   soTang: z.number().int(),
-//   DonViHanhChinh: z.number().int().positive(),
-// });
 // {
 //   "tenToaNha": "Toa A",
 //   "diaChi": "Da Nang",
@@ -24,13 +18,24 @@ const ToaNhaSchema = z.object({
 //
 
 export async function GET(req: NextRequest) {
+  const searchParams = await req.nextUrl.searchParams;
+  const limit: number = Number(searchParams.get("limit")) || 10;
+  const page: number = Number(searchParams.get("page")) || 1;
+
   try {
+    const totalRecords = await prisma.tinhTrangPhong.count();
+    const totalPages = Math.ceil(totalRecords / limit);
     const toaNhas = await prisma.toaNha.findMany({
+      skip: (page - 1) * limit,
+      take: limit,
       include: {
         DonViHanhChinh: true,
       },
     });
-    return NextResponse.json({ toaNhas }, { status: 200 });
+    return NextResponse.json(
+      { toaNhas, extraInfo: { totalRecords, totalPages, page, limit } },
+      { status: 200 }
+    );
   } catch (error) {
     return NextResponse.json({ error: error }, { status: 500 });
   }
