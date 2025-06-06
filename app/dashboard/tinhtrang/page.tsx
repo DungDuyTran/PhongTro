@@ -80,6 +80,27 @@ const Page = () => {
     setPage((prev) => Math.min(prev + 1, totalPages));
   };
 
+  const handDelete = async (id: number) => {
+    if (confirm("Bạn có muốn xóa tình trạng phòng này không?")) {
+      try {
+        const res = await fetch(
+          `http://localhost:3000/api/phongtro_tinhtrangphong/${id}`,
+          {
+            method: "DELETE",
+          }
+        );
+        if (res.ok) {
+          alert("Đã xóa thành công");
+          fetchData();
+        } else {
+          alert("Xóa thất bại");
+        }
+      } catch (error) {
+        alert("Đã xảy ra lỗi khi xóa");
+      }
+    }
+  };
+
   return (
     <div className="p-6 text-white">
       <h1 className="text-green-500 text-4xl font-bold text-center mb-6">
@@ -102,7 +123,7 @@ const Page = () => {
         </Button>
         <Button
           onClick={() => router.push("/add/add-tinhtrang")}
-          className="flex justify-end items-center ml-[700px] bg-green-600 text-white hover:bg-green-700 "
+          className="flex justify-end items-center ml-auto bg-green-600 text-white hover:bg-green-700"
         >
           <Plus className="w-4 h-4 mr-1" />
           Thêm
@@ -136,6 +157,14 @@ const Page = () => {
               <TableCell>{item.tinhTrangPhong.tinhTrang}</TableCell>
               <TableCell>
                 {new Date(item.tinhTrangPhong.ngayCapNhat).toLocaleString()}
+              </TableCell>
+              <TableCell>
+                <Button
+                  className="bg-green-600 text-white hover:bg-green-700 w-16 h-5.5"
+                  onClick={() => handDelete(item.phongTroId)}
+                >
+                  Xóa
+                </Button>
               </TableCell>
             </TableRow>
           ))}

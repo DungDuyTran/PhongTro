@@ -44,7 +44,7 @@ const fetcher = (url: string) => axios.get(url).then((res) => res.data.data);
 
 // Component chính
 const PhongChart = () => {
-  // ✅ Gọi tất cả hooks ở đầu component
+  //  Gọi tất cả hooks ở đầu component
   const router = useRouter();
   const { data, error } = useSWR<PhongTro[]>(
     "http://localhost:3000/api/phongtro?page=1&limit=1000",
@@ -62,7 +62,7 @@ const PhongChart = () => {
     <div>
       <Card className="bg-[#1D2636] text-white">
         <CardHeader>
-          <CardTitle className="flex justify-center items-center text-5xl">
+          <CardTitle className="flex justify-center items-center text-3xl">
             Biểu đồ giá phòng theo tên phòng
           </CardTitle>
         </CardHeader>

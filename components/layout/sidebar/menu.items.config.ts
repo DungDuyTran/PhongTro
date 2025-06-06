@@ -26,6 +26,7 @@ import {
   MessageCircle,
   HandHelping,
   Settings,
+  ChartNoAxesCombined,
 } from "lucide-react";
 
 type SidebarMenuItem = {
@@ -217,6 +218,18 @@ export const menuItems: SidebarMenuItem[] = [
         title: "Nhân Viên Phản Hồi",
         icon: Users,
         href: "/dashboard/nhanvienphanhoi",
+      },
+    ],
+  },
+  {
+    title: "Thống kê",
+    icon: ChartNoAxesCombined,
+    href: "/dashboard/thongke",
+    children: [
+      {
+        title: "Phòng trọ",
+        icon: House,
+        href: "/add/statistics/phong",
       },
     ],
   },
