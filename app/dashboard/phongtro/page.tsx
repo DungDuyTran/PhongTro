@@ -1,4 +1,5 @@
 "use client";
+import { saveAs } from "file-saver";
 import { Trash, Pencil } from "lucide-react";
 import React, { useEffect, useState } from "react";
 import {
@@ -97,40 +98,51 @@ const Page = () => {
       }
     }
   };
+  const handleExportExcel = async () => {
+    try {
+      const res = await fetch("/api/phongtro/export");
+      if (!res.ok) throw new Error("Xuất file thất bại!");
+      const blob = await res.blob();
+      saveAs(blob, "phongtro.xlsx");
+      alert("Bạn đã xuất file thành công!");
+    } catch (error) {
+      alert("Xuất file thất bại!");
+      console.error(error);
+    }
+  };
 
   return (
     <div className="p-6 text-white">
       <h1 className="text-green-500 text-4xl font-bold text-center mb-6">
         DANH SÁCH PHÒNG TRỌ
       </h1>
-
       <div className="flex items-center mb-4">
         <Input
           type="text"
           placeholder="Tìm kiếm..."
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
-          className="text-white w-[250px]"
+          className="text-white w-[200px]"
         />
         <Button
           onClick={handleSearchClick}
-          className="bg-[#1D2636] text-green-600 ml-2 hover:bg-amber-50 "
+          className=" bg-green-600 text-white hover:bg-green-700 ml-3"
         >
           Tìm kiếm
         </Button>
         <Button
-          onClick={() => router.push("/add/add-phong")}
-          className="flex justify-end items-center ml-[700px] bg-green-600 text-white hover:bg-green-700"
+          onClick={() => router.push("/add/add-tinhtrang")}
+          className="flex justify-end items-center ml-auto bg-green-600 text-white hover:bg-green-700"
         >
           <Plus className="w-4 h-4 mr-1" />
           Thêm
         </Button>
-        {/* <Button
-          onClick={() => router.push("/add/recharts/phongchart")}
-          className="flex justify-end items-center ml-2 bg-green-600 text-white hover:bg-green-700"
+        <Button
+          onClick={handleExportExcel}
+          className="ml-3 bg-green-600 hover:bg-green-700 text-white"
         >
-          Biểu đồ
-        </Button> */}
+          Xuất Excel
+        </Button>
       </div>
 
       <Table>

@@ -1,5 +1,6 @@
 "use client";
-
+import { saveAs } from "file-saver";
+import { Trash, Pencil } from "lucide-react";
 import React, { useEffect, useState } from "react";
 import {
   Table,
@@ -13,6 +14,8 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { NextResponse } from "next/server";
+import { error } from "console";
 
 interface PhongTro {
   tenPhong: string;
@@ -100,6 +103,35 @@ const Page = () => {
       }
     }
   };
+  // const handleDelete = async (id: number) => {
+  //   if (confirm("Bạn có chắc muốn xóa tính trạng này không?")) {
+  //   try {
+  //     const res = await fetch(''),{
+  //       method: "DELETE",
+  //     }
+  //   } catch (error) {
+  //     console.error("Lỗi khi xóa: ",error);
+  //     alert(" Đã xảy ra lỗi khi xóa.")
+  //   }
+  //   }
+  // };
+  const handleExportExcel = async () => {
+    try {
+      const res = await fetch("/api/phongtro_tinhtrangphong/export");
+      if (!res) {
+        return NextResponse.json(
+          { error: "Xuất file thất bại" },
+          { status: 500 }
+        );
+      }
+      const blob = await res.blob();
+      saveAs(blob, "TinhTrangPhong.xlsx");
+      alert("Bạn đã xuất file thành công");
+    } catch (error) {
+      alert("Xuất file thất bại");
+      console.error(error);
+    }
+  };
 
   return (
     <div className="p-6 text-white">
@@ -117,7 +149,7 @@ const Page = () => {
         />
         <Button
           onClick={handleSearch}
-          className="bg-[#1D2636] text-green-600 ml-2 hover:bg-amber-50"
+          className=" bg-green-600 text-white hover:bg-green-700 ml-3"
         >
           Tìm kiếm
         </Button>
@@ -127,6 +159,12 @@ const Page = () => {
         >
           <Plus className="w-4 h-4 mr-1" />
           Thêm
+        </Button>
+        <Button
+          onClick={handleExportExcel}
+          className="ml-3 bg-green-600 hover:bg-green-700 text-white"
+        >
+          Xuất Excel
         </Button>
       </div>
 
@@ -163,7 +201,7 @@ const Page = () => {
                   className="bg-green-600 text-white hover:bg-green-700 w-16 h-5.5"
                   onClick={() => handDelete(item.phongTroId)}
                 >
-                  Xóa
+                  <Trash />
                 </Button>
               </TableCell>
             </TableRow>
@@ -171,7 +209,7 @@ const Page = () => {
         </TableBody>
       </Table>
 
-      <div className="fixed bottom-0 left-0 w-full bg-[#0D121F] py-4 flex items-center gap-4 mb-[40px] justify-end mr-[200px] pb-2">
+      <div className="fixed bottom-0 left-0 w-full bg-[#0D121F] py-4 flex items-center gap-4 mb-[40px] justify-end mr-[200px] pb-1">
         <Button
           onClick={handlePrevPage}
           disabled={page === 1}
