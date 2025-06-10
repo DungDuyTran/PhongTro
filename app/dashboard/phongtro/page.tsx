@@ -131,7 +131,7 @@ const Page = () => {
           Tìm kiếm
         </Button>
         <Button
-          onClick={() => router.push("/add/add-tinhtrang")}
+          onClick={() => router.push("/add/add-phong")}
           className="flex justify-end items-center ml-auto bg-green-600 text-white hover:bg-green-700"
         >
           <Plus className="w-4 h-4 mr-1" />
