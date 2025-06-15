@@ -29,21 +29,21 @@ export async function GET() {
       );
     }
 
-    // Chèn tiêu đề cột thủ công tại dòng 6
-    const headerRowNumber = 6;
+    // Chèn tiêu đề cột thủ công tại dòng 7
+    const headerRowNumber = 7;
     const headers = [
       "ID",
       "Tên phòng",
       "Tầng",
-      "Kích thước",
+      "Kích thước (m2)",
       "Giá phòng",
       "Số người tối đa",
       "Tên toà nhà",
       "Địa chỉ",
     ];
-    worksheet.spliceRows(headerRowNumber, 0, headers); // chèn dòng mới tại vị trí 6
+    worksheet.spliceRows(headerRowNumber, 0, headers); // chèn dòng mới tại vị trí 7
 
-    // Bắt đầu ghi dữ liệu từ dòng 7 trở đi
+    // Bắt đầu ghi dữ liệu từ dòng 8 trở đi
     phongTros.forEach((pt, index) => {
       const rowData = [
         pt.id,

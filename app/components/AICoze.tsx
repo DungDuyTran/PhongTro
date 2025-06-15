@@ -20,10 +20,10 @@ const CozeChatWidget = () => {
       if (window.CozeWebSDK?.WebChatClient) {
         new window.CozeWebSDK.WebChatClient({
           config: {
-            bot_id: "7516211434234249234", // ✅ Bot ID từ Coze
+            bot_id: "7516211434234249234", // ✅ Bot ID bạn mới tạo
           },
           componentProps: {
-            title: "Coze Chat 💬",
+            title: "Coze Chatbot 💬",
           },
           auth: {
             type: "token",
@@ -34,7 +34,7 @@ const CozeChatWidget = () => {
           },
         });
       } else {
-        console.error("CozeWebSDK not found!");
+        console.error("❌ CozeWebSDK not found!");
       }
     };
 

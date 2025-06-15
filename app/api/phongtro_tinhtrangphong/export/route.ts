@@ -32,7 +32,7 @@ export async function GET() {
       );
     }
 
-    const headerRowNumber = 6;
+    const headerRowNumber = 7;
     const headers = [
       "ID",
       "Tên Phòng",
@@ -50,8 +50,9 @@ export async function GET() {
         pt.phongTro.id,
         pt.phongTro.tenPhong,
         pt.phongTro.tang,
-        pt.phongTro.giaPhong,
         pt.phongTro.kichThuoc,
+        pt.phongTro.giaPhong,
+
         pt.phongTro.soNguoiToiDa,
         pt.tinhTrangPhong.tinhTrang,
         pt.tinhTrangPhong.ngayCapNhat,
