@@ -92,7 +92,7 @@ model HopDongBaoHiem{
 }
 model ToaNha{
   id Int @id @default(autoincrement()) 
-  tenToaNha String @db.VarChar(255)
+  tenToaNha String @unique @db.VarChar(255)
   diaChi String @db.VarChar(255)
   soTang Int
   PhongTros PhongTro[]

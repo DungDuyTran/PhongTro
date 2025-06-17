@@ -15,6 +15,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
 import { useRouter } from "next/navigation";
+import FileUploadForm from "@/components/FileUploadForm";
 
 interface PhongTro {
   id: number;
@@ -139,10 +140,11 @@ const Page = () => {
         </Button>
         <Button
           onClick={handleExportExcel}
-          className="ml-3 bg-green-600 hover:bg-green-700 text-white"
+          className="ml-3 bg-green-600 hover:bg-green-700 text-white mr-4"
         >
           Xuất Excel
         </Button>
+        <FileUploadForm />
       </div>
 
       <Table>
