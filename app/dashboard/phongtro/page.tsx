@@ -16,7 +16,7 @@ import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
 import { useRouter } from "next/navigation";
 import FileUploadForm from "@/components/FileUploadForm";
-
+import FileUploadFormBulk from "@/components/FileUploadFormBulk";
 interface PhongTro {
   id: number;
   tenPhong: string;
@@ -145,6 +145,7 @@ const Page = () => {
           Xuất Excel
         </Button>
         <FileUploadForm />
+        <FileUploadFormBulk className="ml-2" />
       </div>
 
       <Table>

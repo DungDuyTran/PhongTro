@@ -22,7 +22,7 @@ export default function ImportPhongTro() {
     setErrors([]);
 
     try {
-      const res = await fetch("/api/phongtro/import", {
+      const res = await fetch("/api/phongtro/insertbulk", {
         method: "POST",
         body: formData,
       });
@@ -30,7 +30,7 @@ export default function ImportPhongTro() {
       const data = await res.json();
 
       if (!res.ok) {
-        setMessage(data.message || "Đã xảy ra lỗi khi import");
+        setMessage(data.message || "Đã xảy ra lỗi khi import từ inserbulk");
         setErrors(data.errors || []);
       } else {
         setMessage(data.message || "Import thành công");

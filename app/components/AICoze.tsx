@@ -20,7 +20,7 @@ const CozeChatWidget = () => {
       if (window.CozeWebSDK?.WebChatClient) {
         new window.CozeWebSDK.WebChatClient({
           config: {
-            bot_id: "7516211434234249234", // ✅ Bot ID bạn mới tạo
+            bot_id: "7516211434234249234",
           },
           componentProps: {
             title: "Coze Chatbot 💬",
