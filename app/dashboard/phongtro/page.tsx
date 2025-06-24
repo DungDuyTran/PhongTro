@@ -111,6 +111,19 @@ const Page = () => {
       console.error(error);
     }
   };
+  const handleExportPDF = async () => {
+    try {
+      const res = await fetch("/api/phongtro/pdf");
+      console.log("Response status:", res.status);
+      if (!res.ok) throw new Error("Xuất PDF thất bại!");
+      const blob = await res.blob();
+      saveAs(blob, "phongtro.pdf");
+      alert("Bạn đã xuất file PDF thành công!");
+    } catch (error) {
+      alert("Xuất file PDF thất bại!");
+      console.error(error);
+    }
+  };
 
   return (
     <div className="p-6 text-white">
@@ -146,6 +159,12 @@ const Page = () => {
         </Button>
         <FileUploadForm />
         <FileUploadFormBulk className="ml-2" />
+        <Button
+          onClick={handleExportPDF}
+          className="ml-2 bg-green-600 hover:bg-green-700 text-white"
+        >
+          Xuất PDF
+        </Button>
       </div>
 
       <Table>

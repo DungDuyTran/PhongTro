@@ -1,7 +1,9 @@
 "use client";
-import { saveAs } from "file-saver";
-import { Trash, Pencil } from "lucide-react";
+
 import React, { useEffect, useState } from "react";
+import { saveAs } from "file-saver";
+import { PDFDocument, rgb } from "pdf-lib";
+import fontkit from "@pdf-lib/fontkit";
 import {
   Table,
   TableBody,
@@ -13,8 +15,6 @@ import {
 } from "@/components/ui/table";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Plus } from "lucide-react";
-import { useRouter } from "next/navigation";
 
 interface KhachHang {
   id: number;
@@ -33,7 +33,6 @@ const Page = () => {
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const limit = 7;
-  const router = useRouter();
 
   const fetchData = async () => {
     try {
@@ -41,7 +40,7 @@ const Page = () => {
         `http://localhost:3000/api/khachhang?page=${page}&limit=${limit}`
       );
       const data = await res.json();
-      console.log(data); // Kiểm tra dữ liệu
+      console.log(data);
       setKhachHangs(data.data);
       setFilteredKhachHangs(data.data);
       setTotalPages(data.extraInfo.totalPages);
@@ -72,19 +71,75 @@ const Page = () => {
     handleSearch();
   }, [searchTerm, khachHangs]);
 
-  const truoc = () => {
-    setPage((prev) => Math.max(prev - 1, 1));
-  };
+  const truoc = () => setPage((prev) => Math.max(prev - 1, 1));
+  const sau = () => setPage((prev) => Math.min(prev + 1, totalPages));
 
-  const sau = () => {
-    setPage((prev) => Math.min(prev + 1, totalPages));
+  const handleExportPDF = async () => {
+    try {
+      const res = await fetch("/api/khachhang/pdf");
+      const data: KhachHang[] = await res.json();
+
+      const pdfDoc = await PDFDocument.create();
+      pdfDoc.registerFontkit(fontkit);
+
+      const fontUrl = "/fonts/Roboto-Regular.ttf";
+      const fontBytes = await fetch(fontUrl).then((res) => res.arrayBuffer());
+      const customFont = await pdfDoc.embedFont(fontBytes);
+
+      const page = pdfDoc.addPage([595, 842]);
+      const { height } = page.getSize();
+
+      let y = height - 50;
+
+      page.drawText("DANH SÁCH KHÁCH HÀNG", {
+        x: 50,
+        y,
+        size: 18,
+        font: customFont,
+        color: rgb(0, 0.53, 0),
+      });
+
+      y -= 30;
+
+      data.forEach((khach, index) => {
+        const line = `${index + 1}. ${khach.hoTen} | ${new Date(
+          khach.ngaySinh
+        ).toLocaleDateString()} | CCCD: ${khach.cccd} | Địa chỉ: ${
+          khach.diaChi
+        } | SĐT: ${khach.soDienThoai} | Email: ${khach.email}`;
+
+        page.drawText(line, {
+          x: 50,
+          y,
+          size: 10,
+          font: customFont,
+          color: rgb(0, 0, 0),
+        });
+
+        y -= 20;
+        if (y < 50) {
+          y = height - 50;
+          pdfDoc.addPage([595, 842]);
+        }
+      });
+
+      const pdfBytes = await pdfDoc.save();
+      const blob = new Blob([pdfBytes.buffer as ArrayBuffer], {
+        type: "application/pdf",
+      });
+
+      saveAs(blob, "khachhang.pdf");
+    } catch (err) {
+      console.error("Lỗi khi xuất PDF:", err);
+    }
   };
 
   return (
     <div className="text-white">
-      <h1 className="flex justify-center items-center text-green-500 text-4xl mt-3 mb-3 text-underline">
+      <h1 className="text-green-500 text-4xl mt-3 mb-3 text-center">
         DANH SÁCH KHÁCH HÀNG
       </h1>
+
       <div className="flex items-center mb-4">
         <Input
           type="text"
@@ -99,9 +154,16 @@ const Page = () => {
         >
           Tìm kiếm
         </Button>
+        <Button
+          onClick={handleExportPDF}
+          className="ml-2 bg-green-600 hover:bg-green-700 text-white"
+        >
+          Xuất PDF
+        </Button>
       </div>
+
       <Table>
-        <TableCaption className="text-white"></TableCaption>
+        <TableCaption className="text-white" />
         <TableHeader>
           <TableRow>
             <TableHead className="text-white">ID</TableHead>
@@ -129,22 +191,15 @@ const Page = () => {
           ))}
         </TableBody>
       </Table>
-      <div className="fixed bottom-0 left-0 w-full bg-[#0D121F] py-4 flex items-center gap-4 mb-[40px] justify-end mr-[200px] pb-1">
-        <Button
-          onClick={truoc}
-          disabled={page === 1}
-          className="bg-gray-800 text-white hover:bg-gray-700"
-        >
+
+      <div className="flex justify-end gap-3 mt-4 mb-10">
+        <Button onClick={truoc} disabled={page === 1}>
           Trang trước
         </Button>
-        <span className="text-green-400 font-semibold ml-4 mr-4">
+        <span className="text-green-400 font-semibold">
           Trang {page} / {totalPages}
         </span>
-        <Button
-          onClick={sau}
-          disabled={page === totalPages}
-          className="bg-gray-800 text-white hover:bg-gray-700"
-        >
+        <Button onClick={sau} disabled={page === totalPages}>
           Trang sau
         </Button>
       </div>
