@@ -78,17 +78,18 @@ const Page = () => {
     try {
       const res = await fetch("/api/khachhang/pdf");
       const data: KhachHang[] = await res.json();
-
+      // PDFDocument + fontkit
       const pdfDoc = await PDFDocument.create();
       pdfDoc.registerFontkit(fontkit);
 
+      // tải và nhúng font Roboto
       const fontUrl = "/fonts/Roboto-Regular.ttf";
       const fontBytes = await fetch(fontUrl).then((res) => res.arrayBuffer());
       const customFont = await pdfDoc.embedFont(fontBytes);
 
-      const page = pdfDoc.addPage([595, 842]);
+      // Tạo trang mới và vẽ tiêu đề
+      let page = pdfDoc.addPage([595, 842]);
       const { height } = page.getSize();
-
       let y = height - 50;
 
       page.drawText("DANH SÁCH KHÁCH HÀNG", {
@@ -99,35 +100,39 @@ const Page = () => {
         color: rgb(0, 0.53, 0),
       });
 
-      y -= 30;
+      y -= 40;
 
+      // In từng dòng khách hàng
       data.forEach((khach, index) => {
-        const line = `${index + 1}. ${khach.hoTen} | ${new Date(
-          khach.ngaySinh
-        ).toLocaleDateString()} | CCCD: ${khach.cccd} | Địa chỉ: ${
-          khach.diaChi
-        } | SĐT: ${khach.soDienThoai} | Email: ${khach.email}`;
-
-        page.drawText(line, {
-          x: 50,
-          y,
-          size: 10,
-          font: customFont,
-          color: rgb(0, 0, 0),
+        const entries = [
+          `${index + 1}. Họ tên: ${khach.hoTen}`,
+          `   Ngày sinh: ${new Date(khach.ngaySinh).toLocaleDateString()}`,
+          `   CCCD: ${khach.cccd}`,
+          `   Địa chỉ: ${khach.diaChi}`,
+          `   SĐT: ${khach.soDienThoai}`,
+          `   Email: ${khach.email}`,
+        ];
+        entries.forEach((line) => {
+          if (y < 60) {
+            page = pdfDoc.addPage([595, 842]);
+            y = height - 50;
+          }
+          page.drawText(line, {
+            x: 50,
+            y,
+            size: 10,
+            font: customFont,
+            color: rgb(0, 0, 0),
+          });
+          y -= 15;
         });
-
-        y -= 20;
-        if (y < 50) {
-          y = height - 50;
-          pdfDoc.addPage([595, 842]);
-        }
+        y -= 10;
       });
-
+      // Lưu và tải file PDF
       const pdfBytes = await pdfDoc.save();
       const blob = new Blob([pdfBytes.buffer as ArrayBuffer], {
         type: "application/pdf",
       });
-
       saveAs(blob, "khachhang.pdf");
     } catch (err) {
       console.error("Lỗi khi xuất PDF:", err);
