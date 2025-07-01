@@ -194,7 +194,7 @@ export default function FileUploadFormBulk({ className = "" }) {
         isLoading ? "opacity-70 cursor-not-allowed" : ""
       } ${className}`}
     >
-      {isLoading ? "Đang xử lý..." : "Import Excel"}
+      {isLoading ? "Đang xử lý..." : "Import Excel Bulk"}
     </button>
   );
 }

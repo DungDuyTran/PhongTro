@@ -9,7 +9,7 @@ export async function GET(req: NextRequest) {
     const phongTros = await prisma.phongTro.findMany({
       include: { ToaNha: true },
     });
-    const pdfBuffer = await exportPhongTroToPDF(phongTros);
+    const pdfBuffer: Buffer = await exportPhongTroToPDF(phongTros);
     const arrayBuffer = new Uint8Array(pdfBuffer).buffer;
 
     return new Response(arrayBuffer, {

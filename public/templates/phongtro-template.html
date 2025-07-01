@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <title>PHIẾU THỐNG KÊ PHÒNG TRỌ</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        padding: 40px;
+        color: #1f2937;
+      }
+      h1,
+      h3 {
+        text-align: center;
+        color: #047857;
+      }
+      h2 {
+        text-align: center;
+        color: #059669;
+        margin-bottom: 20px;
+      }
+      hr {
+        margin: 10px 0 20px;
+        border: 0;
+        border-top: 1px solid #ccc;
+      }
+      .logo {
+        text-align: center;
+        font-weight: bold;
+        font-size: 20px;
+        margin-bottom: 4px;
+      }
+      .footer {
+        font-size: 12px;
+        text-align: center;
+        margin-top: 40px;
+        color: #6b7280;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="logo">
+      <h1>ĐỒ ÁN PHÒNG TRỌ</h1>
+      <h3>Số nhà 11 - Thôn Nam Hiệp - Xã Nam Đà</h3>
+      <h3>Huyện Krông Nô - Tỉnh Đăk Nông</h3>
+      <h3>ĐT: 0962684418 - 0976552227</h3>
+      <hr />
+    </div>
+
+    {{{content}}}
+    <div style="text-align: center; margin-top: 40px">
+      <h3>Mã QR tra cứu phòng trọ:</h3>
+      <img src="{{qrCode}}" alt="QR Code" width="150" height="150" />
+    </div>
+
+    <div class="footer">© 2025 Dũng Phòng Trọ. Tất cả quyền được bảo lưu.</div>
+  </body>
+</html>
