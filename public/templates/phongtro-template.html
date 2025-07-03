@@ -12,7 +12,7 @@
       h1,
       h3 {
         text-align: center;
-        color: #047857;
+        color: #059669;
       }
       h2 {
         text-align: center;
@@ -39,19 +39,31 @@
     </style>
   </head>
   <body>
-    <div class="logo">
-      <h1>ĐỒ ÁN PHÒNG TRỌ</h1>
-      <h3>Số nhà 11 - Thôn Nam Hiệp - Xã Nam Đà</h3>
-      <h3>Huyện Krông Nô - Tỉnh Đăk Nông</h3>
-      <h3>ĐT: 0962684418 - 0976552227</h3>
-      <hr />
+    <style>
+      .grid-2col {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 20px;
+      }
+    </style>
+
+    <div class="grid-2col">
+      <div>
+        <h1>ĐỒ ÁN PHÒNG TRỌ</h1>
+        <h3>Số 11 - Thôn Nam Hiệp - Xã Nam Đà</h3>
+        <h3>Huyện Krông Nô - Tỉnh Đăk Nông</h3>
+        <h3>ĐT: 0962684418 - 0976552227</h3>
+        <!-- các dòng còn lại -->
+      </div>
+
+      <div style="text-align: center; margin-left: 70px">
+        <h3 class="text-2xl text-green-800">Mã QR tra cứu</h3>
+        <img src="{{qrCode}}" width="140" height="140" />
+      </div>
     </div>
+    <hr />
 
     {{{content}}}
-    <div style="text-align: center; margin-top: 40px">
-      <h3>Mã QR tra cứu phòng trọ:</h3>
-      <img src="{{qrCode}}" alt="QR Code" width="150" height="150" />
-    </div>
 
     <div class="footer">© 2025 Dũng Phòng Trọ. Tất cả quyền được bảo lưu.</div>
   </body>
