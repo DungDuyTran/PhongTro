@@ -210,8 +210,10 @@ const Page = () => {
               <TableCell>{phong.ToaNha.diaChi}</TableCell>
               <TableCell>
                 <Button
-                  onClick={() => handleDelete(phong.id)}
-                  className="bg-green-600 text-white hover:bg-green-700 w-5 h-5.5"
+                  onClick={() =>
+                    router.push(`/add/add/add-phong?id=${phong.id}`)
+                  }
+                  className="bg-yellow-600 text-white hover:bg-yellow-700 w-5 h-5.5"
                 >
                   <Pencil />
                 </Button>
@@ -229,7 +231,7 @@ const Page = () => {
         </TableBody>
       </Table>
 
-      <div className="fixed bottom-0 left-0 w-full bg-[#0D121F] py-4 flex items-center gap-4 mb-[40px] justify-end mr-[200px] pb-1">
+      <div className="fixed bottom-0 left-0 w-full bg-[#0D121F] py-4 flex items-center gap-4 mb-[30px] justify-end mr-[200px] pb-1">
         <Button
           onClick={handlePrevPage}
           disabled={page === 1}

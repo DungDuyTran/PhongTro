@@ -1,13 +1,19 @@
+// Import các module cần thiết từ Next.js và thư viện bên ngoài
 import { NextRequest, NextResponse } from "next/server";
 import { parsePhongTroFromExcel } from "@/lib/excel/parsePhongTro";
 import { prisma } from "@/prisma/client";
 import { Buffer } from "node:buffer";
 
+// Hàm xử lý POST request để import file Excel
 export async function POST(req: NextRequest) {
   try {
+    // Lấy dữ liệu form (dạng multipart/form-data)
     const formData = await req.formData();
+
+    // Lấy file từ form data
     const file = formData.get("file") as File;
 
+    // Nếu không có file được gửi lên, trả về lỗi
     if (!file) {
       return NextResponse.json(
         {
@@ -18,10 +24,12 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    // Kiểm tra loại file hợp lệ (Excel)
     const allowedTypes = [
-      "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-      "application/vnd.ms-excel",
+      "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", // .xlsx
+      "application/vnd.ms-excel", // .xls
     ];
+
     if (!allowedTypes.includes(file.type)) {
       return NextResponse.json(
         {
@@ -31,11 +39,14 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    // Đọc file thành buffer (array buffer → node buffer)
     const arrayBuffer = await file.arrayBuffer();
     const nodeBuffer = Buffer.from(new Uint8Array(arrayBuffer));
 
+    // Phân tích dữ liệu từ file Excel thành validData và invalidRows
     const { validData, invalidRows } = await parsePhongTroFromExcel(nodeBuffer);
 
+    // Nếu tất cả các dòng đều sai → trả lỗi và danh sách dòng lỗi
     if (validData.length === 0 && invalidRows.length > 0) {
       return NextResponse.json(
         {
@@ -47,13 +58,16 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    // Nếu có dữ liệu hợp lệ → tiến hành ghi vào database
     if (validData.length > 0) {
       for (const data of validData) {
+        // Tách thông tin tòa nhà và dữ liệu phòng
         const { ToaNha, ...phongData } = data;
 
         const createToaNha = ToaNha?.connectOrCreate?.create;
         const whereToaNha = ToaNha?.connectOrCreate?.where;
 
+        // Nếu thiếu tên tòa nhà → trả lỗi
         if (!whereToaNha?.tenToaNha) {
           return NextResponse.json(
             {
@@ -64,16 +78,17 @@ export async function POST(req: NextRequest) {
           );
         }
 
-        // Gán giá trị mặc định nếu soTang bị thiếu hoặc không phải số
+        // Nếu số tầng không hợp lệ → gán mặc định là 1
         const soTang =
           typeof createToaNha?.soTang === "number" &&
           !isNaN(createToaNha.soTang)
             ? createToaNha.soTang
             : 1;
 
+        // Gọi Prisma để tạo bản ghi phòng trọ + toà nhà (connectOrCreate)
         await prisma.phongTro.create({
           data: {
-            ...phongData,
+            ...phongData, // Các trường như tenPhong, tang, kichThuoc...
             ToaNha: {
               connectOrCreate: {
                 where: {
@@ -85,7 +100,7 @@ export async function POST(req: NextRequest) {
                   soTang: soTang,
                   DonViHanhChinh: {
                     connect: {
-                      id: createToaNha.DonViHanhChinhId || 1,
+                      id: createToaNha.DonViHanhChinhId || 1, // Gán id mặc định nếu không có
                     },
                   },
                 },
@@ -96,12 +111,14 @@ export async function POST(req: NextRequest) {
       }
     }
 
+    // Trả kết quả thành công sau khi import
     return NextResponse.json({
       message: `Quá trình import hoàn tất. Đã nhập thành công ${validData.length} phòng trọ.`,
       imported: validData.length,
       errors: invalidRows,
     });
   } catch (error: any) {
+    // Ghi log và trả lỗi nếu có exception trong quá trình xử lý
     console.error("Lỗi trong quá trình xử lý import file:", error);
     return NextResponse.json(
       {

@@ -111,6 +111,20 @@ export default function ChiTietHopDongList() {
     }
   };
 
+  const handleExportHopDongWord = async (hopDongId: number) => {
+    try {
+      const res = await fetch(`/api/report/hopdongword?id=${hopDongId}`);
+      if (!res.ok) throw new Error("Lỗi khi xuất Word");
+
+      const blob = await res.blob();
+      saveAs(blob, `hopdong-${hopDongId}.docx`);
+      alert("✅ Xuất file Word thành công!");
+    } catch (err) {
+      console.error("❌ Xuất Word lỗi:", err);
+      alert("❌ Xuất file Word thất bại!");
+    }
+  };
+
   return (
     <div className="">
       <h1 className="flex justify-center items-center text-green-500 text-4xl mt-3 mb-3 text-underline">
@@ -162,10 +176,16 @@ export default function ChiTietHopDongList() {
               <TableCell className="text-white">
                 <Button
                   onClick={() => handleExportHopDong(item.HopDongId)}
-                  className="bg-green-600 hover:bg-green-700 text-white"
+                  className="bg-green-600 hover:bg-green-700 text-white mr-1"
                 >
-                  <FileText className="w-4 h-4 mr-1" />
-                  Xuất HĐ
+                  Xuất PDF
+                </Button>
+
+                <Button
+                  onClick={() => handleExportHopDongWord(item.HopDongId)}
+                  className="bg-green-600 hover:bg-green-700 text-white mr-1"
+                >
+                  Xuất Word
                 </Button>
               </TableCell>
             </TableRow>

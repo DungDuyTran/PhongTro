@@ -1,19 +1,25 @@
+// Import thư viện ExcelJS để đọc file .xlsx
 import ExcelJS from "exceljs";
+// Import Buffer từ node (dùng khi xử lý dữ liệu binary)
 import { Buffer } from "node:buffer";
 
+// Hàm chính: nhận buffer từ file Excel, trả về validData và invalidRows
 export async function parsePhongTroFromExcel(buffer: Buffer) {
   const workbook = new ExcelJS.Workbook();
 
   try {
+    // Load buffer vào workbook từ file Excel (async)
     await workbook.xlsx.load(buffer);
   } catch (err) {
     console.error("Lỗi khi tải file Excel:", err);
+
+    // Nếu file hỏng hoặc không đúng định dạng Excel, throw lỗi rõ ràng
     throw new Error(
       "File Excel không hợp lệ hoặc không thể đọc được. Vui lòng kiểm tra định dạng và nội dung."
     );
   }
 
-  // Lấy worksheet đầu tiên (hoặc theo tên nếu bạn biết chắc)
+  // Lấy worksheet đầu tiên (theo index = 1)
   const worksheet = workbook.getWorksheet(1);
   if (!worksheet) {
     throw new Error(
@@ -21,61 +27,89 @@ export async function parsePhongTroFromExcel(buffer: Buffer) {
     );
   }
 
+  // Mảng chứa dữ liệu hợp lệ
   const validData: any[] = [];
+
+  // Mảng chứa các dòng lỗi và lý do lỗi
   const invalidRows: any[] = [];
 
-  // Lặp qua từng dòng, bỏ qua 7 dòng đầu tiên (header và thông tin khác)
-  // Bạn đã có `rowNumber < 8` nên dữ liệu sẽ bắt đầu từ dòng 8.
+  // Duyệt qua từng dòng trong file Excel
   worksheet.eachRow((row, rowNumber) => {
-    if (rowNumber < 8) return; // Bỏ qua 7 dòng đầu tiên
+    // Bỏ qua 7 dòng đầu tiên (dòng tiêu đề, hướng dẫn, mô tả...)
+    if (rowNumber < 8) return;
 
-    // Lấy giá trị của các ô, ép kiểu rõ ràng hơn để tránh lỗi runtime
-    // Lưu ý: ExcelJS trả về giá trị dựa trên loại ô. toString() hoặc Number() là cần thiết.
+    // ExcelJS trả về row.values là 1 mảng với index bắt đầu từ 1
     const values = row.values as (ExcelJS.CellValue | undefined)[];
 
-    // Đảm bảo truy cập đúng index và xử lý các giá trị undefined
+    // Ép kiểu, loại bỏ undefined, chuyển sang string hoặc number
     const tenPhong = (values[1]?.toString() || "").trim();
     const tang = Number(values[2]);
     const kichThuoc = Number(values[3]);
     const giaPhong = Number(values[4]);
     const soNguoiToiDa = Number(values[5]);
     const tenToaNha = (values[6]?.toString() || "").trim();
-    const diaChi = (values[7]?.toString() || "").trim(); // Địa chỉ có thể trống
+    const diaChi = (values[7]?.toString() || "").trim(); // Có thể để trống
 
+    // Khởi tạo object chứa lỗi cho từng cột
     const errors: Record<string, string[]> = {};
 
-    // Validate dữ liệu
-    if (!tenPhong) errors.tenPhong = ["Tên phòng không được bỏ trống."];
-    if (isNaN(tang) || tang <= 0)
-      errors.tang = ["Tầng phải là một số nguyên dương."];
-    if (isNaN(kichThuoc) || kichThuoc <= 0)
-      errors.kichThuoc = ["Kích thước phải là một số dương."];
-    if (isNaN(giaPhong) || giaPhong <= 0)
-      errors.giaPhong = ["Giá phòng phải là một số tiền dương."];
-    if (isNaN(soNguoiToiDa) || soNguoiToiDa <= 0)
-      errors.soNguoiToiDa = ["Số người tối đa phải là một số nguyên dương."];
-    if (!tenToaNha) errors.tenToaNha = ["Tên tòa nhà không được bỏ trống."];
+    // Bắt đầu validate từng trường dữ liệu
+    if (!tenPhong) {
+      errors.tenPhong = ["Tên phòng không được bỏ trống."];
+    }
 
-    // Thêm dữ liệu vào mảng hợp lệ hoặc không hợp lệ
+    if (isNaN(tang) || tang <= 0) {
+      errors.tang = ["Tầng phải là một số nguyên dương."];
+    }
+
+    if (isNaN(kichThuoc) || kichThuoc <= 0) {
+      errors.kichThuoc = ["Kích thước phải là một số dương."];
+    }
+
+    if (isNaN(giaPhong) || giaPhong <= 0) {
+      errors.giaPhong = ["Giá phòng phải là một số tiền dương."];
+    }
+
+    if (isNaN(soNguoiToiDa) || soNguoiToiDa <= 0) {
+      errors.soNguoiToiDa = ["Số người tối đa phải là một số nguyên dương."];
+    }
+
+    if (!tenToaNha) {
+      errors.tenToaNha = ["Tên tòa nhà không được bỏ trống."];
+    }
+
+    // Nếu có lỗi → thêm dòng này vào danh sách lỗi
     if (Object.keys(errors).length > 0) {
-      invalidRows.push({ row: rowNumber, errors, originalData: values }); // Lưu thêm dữ liệu gốc để dễ debug
+      invalidRows.push({
+        row: rowNumber, // Dòng lỗi (bắt đầu từ 1)
+        errors, // Lỗi chi tiết theo cột
+        originalData: values, // Dữ liệu gốc để tiện debug UI nếu cần
+      });
     } else {
+      // Nếu không có lỗi → thêm vào mảng hợp lệ
       validData.push({
         tenPhong,
         tang,
         kichThuoc,
         giaPhong,
         soNguoiToiDa,
-        // Dùng connectOrCreate cho ToaNha để tạo mới nếu chưa tồn tại, hoặc kết nối nếu đã có
+
+        // Thêm cấu trúc connectOrCreate cho ToaNha
         ToaNha: {
           connectOrCreate: {
-            where: { tenToaNha: tenToaNha }, // Điều kiện tìm kiếm tòa nhà
-            create: { tenToaNha: tenToaNha, diaChi: diaChi }, // Dữ liệu tạo mới nếu không tìm thấy
+            where: {
+              tenToaNha: tenToaNha, // Dùng tenToaNha để tìm
+            },
+            create: {
+              tenToaNha: tenToaNha, // Nếu chưa tồn tại thì tạo mới
+              diaChi: diaChi, // Địa chỉ có thể trống
+            },
           },
         },
       });
     }
   });
 
+  // Trả về dữ liệu hợp lệ và lỗi
   return { validData, invalidRows };
 }
