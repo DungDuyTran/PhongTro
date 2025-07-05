@@ -125,6 +125,47 @@ export default function ChiTietHopDongList() {
     }
   };
 
+  const handleSendMail = async (
+    hopDong: HopDong,
+    phong: PhongTro,
+    khach: KhachHang
+  ) => {
+    try {
+      const response = await fetch("/api/send-mail", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          to: khach.hoTen.includes("@")
+            ? khach.hoTen
+            : "tranduydunga1@gmail.com",
+          hopDongData: {
+            id: hopDong.id,
+            tenPhong: phong.tenPhong,
+            tang: phong.tang,
+            giaPhong: phong.giaPhong.toLocaleString(),
+            tienDaCoc: hopDong.tienDaCoc.toLocaleString(),
+            ngayBatDau: new Date(hopDong.ngayBatDau).toISOString().slice(0, 10),
+            ngayKetThuc: new Date(hopDong.ngayKetThuc)
+              .toISOString()
+              .slice(0, 10),
+            khachHang: khach.hoTen,
+            ghiChu: hopDong.ghiChu,
+          },
+        }),
+      });
+
+      const result = await response.json();
+      if (result.success) {
+        alert("✅ Gửi mail thành công!");
+      } else {
+        throw new Error(result.message || "Gửi thất bại");
+      }
+    } catch (err) {
+      console.error("❌ Gửi mail lỗi:", err);
+      alert("❌ Gửi mail thất bại!");
+    }
+  };
+
   return (
     <div className="">
       <h1 className="flex justify-center items-center text-green-500 text-4xl mt-3 mb-3 text-underline">
@@ -186,6 +227,18 @@ export default function ChiTietHopDongList() {
                   className="bg-green-600 hover:bg-green-700 text-white mr-1"
                 >
                   Xuất Word
+                </Button>
+                <Button
+                  onClick={() =>
+                    handleSendMail(
+                      item.HopDong,
+                      item.PhongTro,
+                      item.HopDong?.KhachHang!
+                    )
+                  }
+                  className="bg-green-600 hover:bg-green-700 text-white mr-1"
+                >
+                  Gửi mail
                 </Button>
               </TableCell>
             </TableRow>

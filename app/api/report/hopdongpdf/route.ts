@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/prisma/client";
+// import { exportHopDongToPDF } from "@/lib/export-hopdong-pdf";
 import { exportHopDongToPDF } from "@/lib/export-hopdong-pdf";
-
 export const runtime = "nodejs";
 
 export async function GET(req: NextRequest) {
@@ -39,6 +39,7 @@ export async function GET(req: NextRequest) {
 
     // Chuẩn bị dữ liệu để truyền vào hàm exportHopDongToPDF
     const pdfBuffer = await exportHopDongToPDF({
+      id: hopDongId,
       tenPhong: PhongTro.tenPhong,
       tang: PhongTro.tang,
       giaPhong: PhongTro.giaPhong.toLocaleString("vi-VN"),
