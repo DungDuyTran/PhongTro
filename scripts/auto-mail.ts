@@ -5,10 +5,10 @@ import { transporter, mailOptions } from "../lib/mail";
 import { exportHopDongToPDF } from "../lib/export-hopdong-pdf";
 import cron from "node-cron";
 
-// ✅ Hàm gửi email kèm file PDF hợp đồng
+// Hàm gửi email kèm file PDF hợp đồng
 async function sendAutoMail() {
   try {
-    // 🔧 Dữ liệu hợp đồng mẫu — có thể lấy từ DB hoặc API
+    // Dữ liệu hợp đồng mẫu — có thể lấy từ DB hoặc API
     const hopDongData = {
       id: "HD001",
       tenPhong: "P101",
@@ -21,10 +21,10 @@ async function sendAutoMail() {
       ghiChu: "Hợp đồng 6 tháng",
     };
 
-    // ✅ Tạo file PDF từ template
+    // Tạo file PDF từ template
     const pdfBuffer = await exportHopDongToPDF(hopDongData);
 
-    // ✅ Gửi email với file đính kèm
+    // Gửi email với file đính kèm
     await transporter.sendMail({
       ...mailOptions,
       to: "tranduydunga1@gmail.com",
@@ -43,15 +43,15 @@ async function sendAutoMail() {
       new Date().toLocaleString()
     );
   } catch (err) {
-    console.error("❌ Lỗi khi gửi mail:", err);
+    console.error(" Lỗi khi gửi mail:", err);
   }
 }
 
-// 🕒 Lên lịch gửi mail lúc 21:53 hằng ngày
+// Lên lịch gửi mail lúc 21:53 hằng ngày
 cron.schedule("03 22 * * *", () => {
   console.log("🕐 Đến giờ gửi mail tự động (21:53)...");
   sendAutoMail();
 });
 
-// ✅ Gửi ngay lập tức khi chạy file (dùng để test)
+// Gửi ngay lập tức khi chạy file (dùng để test)
 sendAutoMail();
