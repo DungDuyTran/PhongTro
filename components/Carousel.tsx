@@ -19,7 +19,7 @@ const Carousel = () => {
   };
 
   return (
-    <div className="w-full max-w-2xl mx-auto">
+    <div className="w-full max-w-2xl mx-auto" data-aos="zoom-in">
       <Slider {...settings}>
         <div>
           <img

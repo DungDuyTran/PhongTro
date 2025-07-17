@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
+import "aos/dist/aos.css";
 import "./globals.css";
+import Header from "@/components/trangChu/header/page"; // Header chính
 
 export const metadata: Metadata = {
   title: "Phòng trọ của Dũng",
@@ -23,8 +25,18 @@ export default function RootLayout({
           rel="stylesheet"
         />
       </head>
+      <body className="antialiased overflow-x-hidden">
+        {/* Dùng flex-col và min-h-screen để tránh tràn */}
+        <main className="flex flex-col min-h-screen bg-white text-black font-bold">
+          {/* Header top */}
+          <div className="bg-white sticky top-0 z-40">
+            <Header />
+          </div>
 
-      <body className="antialiased">{children}</body>
+          {/* Nội dung chính */}
+          <div className="flex-grow">{children}</div>
+        </main>
+      </body>
     </html>
   );
 }

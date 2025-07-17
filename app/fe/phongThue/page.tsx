@@ -1,15 +1,12 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
+import AOS from "aos";
+import "aos/dist/aos.css";
 
-interface KhachHang {
-  id: number;
-  hoTen: string;
-  ngaySinh: string;
-  cccd: string;
+interface ToaNha {
+  tenToaNha: string;
   diaChi: string;
-  soDienThoai: string;
-  email: string;
 }
 
 interface PhongTro {
@@ -19,88 +16,92 @@ interface PhongTro {
   kichThuoc: number;
   giaPhong: number;
   soNguoiToiDa: number;
-  toaNha: { tenToaNha: string };
   hinhAnh?: string;
+  ToaNha: ToaNha;
+}
+
+interface PhongDangThue {
+  phongTroId: number;
+  khachHangId: number;
+  phongTro: PhongTro;
 }
 
 export default function PhongTroPage() {
-  const [khachHang, setKhachHang] = useState<KhachHang | null>(null);
-  const [phongCuaToi, setPhongCuaToi] = useState<PhongTro | null>(null);
+  const [phongThue, setPhongThue] = useState<PhongDangThue | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState<boolean>(true);
 
   useEffect(() => {
-    const khachId = 7;
+    // Khởi tạo hiệu ứng AOS
+    AOS.init({ duration: 1000 });
 
-    fetch(`/api/khachhang/${khachId}`)
+    // Gọi API
+    fetch("/api/phongdangthue")
       .then((res) => res.json())
-      .then((data) => setKhachHang(data.data));
-
-    fetch(`/api/phongtro/khachhang/${khachId}`)
-      .then((res) => res.json())
-      .then((data) => setPhongCuaToi(data));
+      .then((res) => {
+        console.log("Kết quả API:", res);
+        const filtered = res?.data?.find?.(
+          (item: PhongDangThue) =>
+            item.khachHangId === 7 && item.phongTroId === 1
+        );
+        setPhongThue(filtered || null);
+        setError(null);
+        setLoading(false);
+      })
+      .catch((err) => {
+        console.error("Lỗi khi fetch API:", err);
+        setError("Không thể tải dữ liệu từ server.");
+        setLoading(false);
+      });
   }, []);
 
-  return (
-    <div className="p-4 space-y-8">
-      {khachHang && (
-        <section className="border rounded shadow bg-white p-4">
-          <h2 className="text-lg font-semibold mb-2">Thông tin khách hàng</h2>
-          <p>
-            <strong>Họ tên:</strong> {khachHang.hoTen}
-          </p>
-          <p>
-            <strong>Ngày sinh:</strong>{" "}
-            {new Date(khachHang.ngaySinh).toLocaleDateString()}
-          </p>
-          <p>
-            <strong>CCCD:</strong> {khachHang.cccd}
-          </p>
-          <p>
-            <strong>Địa chỉ:</strong> {khachHang.diaChi}
-          </p>
-          <p>
-            <strong>SĐT:</strong> {khachHang.soDienThoai}
-          </p>
-          <p>
-            <strong>Email:</strong> {khachHang.email}
-          </p>
-        </section>
-      )}
+  if (loading) {
+    return <p className="p-4 text-blue-500">Đang tải dữ liệu...</p>;
+  }
 
-      {phongCuaToi && (
-        <section className="border rounded-xl p-4 shadow-md bg-green-50">
-          <h2 className="text-xl font-semibold text-green-700 mb-2">
-            Phòng đang thuê
-          </h2>
-          <div className="flex gap-4">
-            <img
-              src={
-                phongCuaToi.hinhAnh ||
-                "https://kientructrangkim.com/wp-content/uploads/2022/11/thiet-ke-noi-that-phong-tro-4.jpg"
-              }
-              className="w-48 h-32 object-cover rounded-lg"
-              alt="Phòng đang thuê"
-            />
-            <div className="space-y-1">
-              <p>
-                <strong>Phòng:</strong> {phongCuaToi.tenPhong}
-              </p>
-              <p>
-                <strong>Tầng:</strong> {phongCuaToi.tang}
-              </p>
-              <p>
-                <strong>Diện tích:</strong> {phongCuaToi.kichThuoc} m²
-              </p>
-              <p>
-                <strong>Giá thuê:</strong>{" "}
-                {phongCuaToi.giaPhong.toLocaleString()} đ/tháng
-              </p>
-              <p>
-                <strong>Tòa nhà:</strong> {phongCuaToi.toaNha.tenToaNha}
-              </p>
-            </div>
-          </div>
-        </section>
-      )}
+  if (error) {
+    return <p className="p-4 text-red-600">{error}</p>;
+  }
+
+  if (!phongThue) {
+    return (
+      <p className="p-4 text-red-600">Không tìm thấy phòng cho khách hàng 7.</p>
+    );
+  }
+
+  const phong = phongThue.phongTro;
+
+  return (
+    <div className="p-4 w-auto font-medium">
+      <h1 className="text-4xl mb-4 flex justify-center" data-aos="fade-down">
+        Thông tin phòng bạn đang thuê
+      </h1>
+
+      <div
+        className="flex flex-col md:flex-row justify-center items-center gap-20 border rounded-xl p-4"
+        data-aos="flip-up"
+      >
+        {/* Ảnh phòng */}
+        <img
+          src={
+            phong.hinhAnh ||
+            "https://kientructrangkim.com/wp-content/uploads/2022/11/thiet-ke-noi-that-phong-tro-4.jpg"
+          }
+          alt="Ảnh phòng"
+          className="w-full md:w-120 h-auto object-cover rounded-lg shadow"
+        />
+
+        {/* Thông tin phòng */}
+        <div className="space-y-2 text-sm md:text-base" data-aos="fade-up">
+          <p>Phòng: {phong.tenPhong}</p>
+          <p>Tầng: {phong.tang}</p>
+          <p>Diện tích: {phong.kichThuoc} m²</p>
+          <p>Giá thuê: {phong.giaPhong.toLocaleString()} đ/tháng</p>
+          <p>Số người tối đa: {phong.soNguoiToiDa}</p>
+          <p>Tòa nhà: {phong.ToaNha?.tenToaNha}</p>
+          <p>Địa chỉ: {phong.ToaNha?.diaChi}</p>
+        </div>
+      </div>
     </div>
   );
 }

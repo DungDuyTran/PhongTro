@@ -54,7 +54,19 @@ model PhongTro{
   BaoTriPhongTros BaoTriPhongTro[]
   PhanHoi_PhongTros PhanHoi_PhongTro[]
   LichSuThayDoiPhongs LichSuThayDoiPhong[]
+  PhongDangThues PhongDangThue[]
 }
+model PhongDangThue {
+  phongTro     PhongTro   @relation(fields: [phongTroId], references: [id])
+  phongTroId   Int
+
+  khachHang    KhachHang  @relation(fields: [khachHangId], references: [id])
+  khachHangId  Int
+
+  @@id([phongTroId, khachHangId])  // 👈 Khóa chính tổng hợp
+  @@map("PhongDangThue")           // 👈 Đổi tên bảng SQL (có khoảng trắng thì nên bỏ)
+}
+
 // KHÁCH HÀNG
 model KhachHang{
   id Int @id @default(autoincrement())
@@ -73,6 +85,7 @@ model KhachHang{
   QuanLyKhachHangs QuanLyKhachHang[]
   HoaDons HoaDon[]
   HopDongs HopDong[]
+  PhongDangThues PhongDangThue[]
 }
 //PhongTro
 model DonViHanhChinh{
