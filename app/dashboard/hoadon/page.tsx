@@ -9,6 +9,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import StripeButton from "@/app/components/StripeButton";
 
 interface HoaDon {
   id: number;
@@ -92,6 +93,9 @@ const Page = () => {
                       item.LichSuThanhToan.ngayThanhToan
                     ).toLocaleDateString()
                   : "—"}
+              </TableCell>
+              <TableCell>
+                <StripeButton soTien={Number(item.soTien)} hoaDonId={item.id} />
               </TableCell>
             </TableRow>
           ))}

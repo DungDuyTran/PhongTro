@@ -9,6 +9,7 @@ import Header2 from "../header2/page";
 import Footer from "@/components/Footer";
 import FooterTC from "../footer/page";
 import Image from "@/components/Image";
+import MenuTC from "../menu/page";
 
 const Contents = () => {
   useEffect(() => {
@@ -59,6 +60,9 @@ const Contents = () => {
             <Image />
           </div>
         </div>
+      </div>
+      <div className="mt-8">
+        <MenuTC />
       </div>
       <div className="mt-8">
         <FooterTC />
