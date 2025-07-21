@@ -95,7 +95,16 @@ const Page = () => {
                   : "—"}
               </TableCell>
               <TableCell>
-                <StripeButton soTien={Number(item.soTien)} hoaDonId={item.id} />
+                {item.tinhTrang === "Chưa thanh toán" ? (
+                  <StripeButton
+                    soTien={Number(item.soTien)}
+                    hoaDonId={item.id}
+                  />
+                ) : (
+                  <span className="text-green-600 font-semibold">
+                    Đã thanh toán
+                  </span>
+                )}
               </TableCell>
             </TableRow>
           ))}

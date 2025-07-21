@@ -1,5 +1,6 @@
 import Stripe from "stripe";
 import { NextResponse } from "next/server";
+import { prisma } from "@/lib/db";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
   apiVersion: "2025-06-30.basil",
@@ -7,6 +8,13 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
 
 export async function POST(req: Request) {
   const { soTien, hoaDonId } = await req.json();
+
+  if (soTien > 99999999) {
+    return NextResponse.json(
+      { error: "Số tiền vượt quá giới hạn Stripe" },
+      { status: 400 }
+    );
+  }
 
   try {
     const session = await stripe.checkout.sessions.create({
@@ -18,7 +26,7 @@ export async function POST(req: Request) {
             product_data: {
               name: `Thanh toán hóa đơn #${hoaDonId}`,
             },
-            unit_amount: soTien, // Stripe tính theo VND x 1000
+            unit_amount: soTien,
           },
           quantity: 1,
         },

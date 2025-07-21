@@ -15,9 +15,7 @@ export default function StripeButton({
     setLoading(true);
     const res = await fetch("/api/stripe", {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ soTien, hoaDonId }),
     });
 
@@ -25,8 +23,8 @@ export default function StripeButton({
     if (data.url) {
       window.location.href = data.url;
     } else {
+      alert("Có lỗi xảy ra: " + data.error);
       setLoading(false);
-      alert("Có lỗi xảy ra, vui lòng thử lại!");
     }
   };
 
@@ -36,7 +34,7 @@ export default function StripeButton({
       disabled={loading}
       className="bg-green-600 text-white px-3 py-1 rounded hover:bg-green-700"
     >
-      {loading ? "Đang thực hiện..." : "Thanh toán"}
+      {loading ? "LOADING..." : "Thanh toán"}
     </button>
   );
 }
