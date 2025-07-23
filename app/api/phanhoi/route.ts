@@ -1,94 +1,70 @@
-import { prisma } from "@/prisma/client";
-import { error } from "console";
-import exp from "constants";
+import prisma from "@/lib/db";
 import { NextRequest, NextResponse } from "next/server";
-import { z } from "zod";
 
-const PhanHoiSchema = z.object({
-  noiDung: z.string(),
-  ngayPhanHoi: z.coerce.date(),
-  trangThai: z.boolean(),
-  KhachHangId: z.number().int().positive(),
-});
-// {
-//     "noiDung": "Phong rat sach se va thoang mat",
-//     "ngayPhanHoi": "2025-04-15T00:00:00.000Z",
-//     "trangThai": true,
-//     "KhachHangId": 12
-//   }
-
-export async function GET(req: NextRequest) {
-  const searchParams = await req.nextUrl.searchParams;
-  const limit: number = Number(searchParams.get("limit")) || 10;
-  const page: number = Number(searchParams.get("page")) || 1;
-
+export async function POST(req: NextRequest) {
   try {
-    const totalRecords = await prisma.tinhTrangPhong.count();
-    const totalPages = Math.ceil(totalRecords / limit);
-    const data = await prisma.phanHoi.findMany({
-      skip: (page - 1) * limit,
-      take: limit,
+    const body = await req.json();
+    const noiDung = body.noiDung ?? "";
+    const khachHangId = body.khachHangId ?? null;
+
+    if (!noiDung || !khachHangId) {
+      return NextResponse.json(
+        { success: false, error: "Thiếu nội dung hoặc khách hàng ID" },
+        { status: 400 }
+      );
+    }
+
+    const newFeedback = await prisma.phanHoi.create({
+      data: {
+        noiDung,
+        ngayPhanHoi: new Date(),
+        trangThai: false,
+        KhachHangId: khachHangId,
+      },
       include: {
         KhachHang: true,
       },
     });
+
+    return NextResponse.json({ success: true, data: newFeedback });
+  } catch (error: any) {
     return NextResponse.json(
-      { data, extraInfo: { totalRecords, totalPages, page, limit } },
-      { status: 200 }
+      { success: false, error: error.message || "Lỗi máy chủ" },
+      { status: 500 }
     );
-  } catch (error) {
-    return NextResponse.json({ error: error }, { status: 400 });
   }
 }
 
-export async function POST(req: NextRequest) {
+export async function GET(req: NextRequest) {
+  const searchParams = req.nextUrl.searchParams;
+  const limit = Number(searchParams.get("limit")) || 10;
+  const page = Number(searchParams.get("page")) || 1;
+  const trangThaiFilter = searchParams.get("trangThai");
+
   try {
-    const data = await req.json();
-    const success = PhanHoiSchema.safeParse(data);
-    if (!success.success) {
-      return NextResponse.json(
-        { error: success.error.errors },
-        { status: 400 }
-      );
+    const where: any = {};
+    if (trangThaiFilter !== null) {
+      where.trangThai = trangThaiFilter === "true";
     }
-    const newData = await prisma.phanHoi.create({
-      data: {
-        noiDung: success.data.noiDung,
-        ngayPhanHoi: success.data.ngayPhanHoi,
-        trangThai: success.data.trangThai,
-        KhachHangId: success.data.KhachHangId,
-      },
+
+    const totalRecords = await prisma.phanHoi.count({ where });
+    const totalPages = Math.ceil(totalRecords / limit);
+    const data = await prisma.phanHoi.findMany({
+      where,
+      skip: (page - 1) * limit,
+      take: limit,
+      orderBy: { ngayPhanHoi: "desc" },
+      include: { KhachHang: true },
     });
-    return NextResponse.json({ newData }, { status: 200 });
-  } catch (error) {
-    return NextResponse.json({ error: error }, { status: 400 });
-  }
-}
-export async function PUT(req: NextRequest) {
-  try {
-    const data = await req.json();
-    const success = PhanHoiSchema.safeParse(data);
-    if (!success.success) {
-      return NextResponse.json({ error: error }, { status: 200 });
-    }
-    const update = await prisma.phanHoi.updateMany({
-      data: {
-        noiDung: success.data.noiDung,
-        ngayPhanHoi: success.data.ngayPhanHoi,
-        trangThai: success.data.trangThai,
-        KhachHangId: success.data.KhachHangId,
-      },
+
+    return NextResponse.json({
+      data,
+      extraInfo: { totalRecords, totalPages, page, limit },
     });
-    return NextResponse.json({ message: "thanh cong" }, { status: 200 });
-  } catch (error) {
-    return NextResponse.json({ error: error }, { status: 400 });
-  }
-}
-export async function DELETE(req: NextRequest) {
-  try {
-    const deleted = await prisma.phanHoi.deleteMany();
-    return NextResponse.json({ message: "xoa thành công" }, { status: 200 });
-  } catch (error) {
-    return NextResponse.json({ error: error }, { status: 400 });
+  } catch (error: any) {
+    return NextResponse.json(
+      { success: false, error: error.message || "Lỗi máy chủ" },
+      { status: 500 }
+    );
   }
 }

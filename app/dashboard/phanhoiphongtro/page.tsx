@@ -9,6 +9,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import NotificationBell from "@/app/components/NotificationBell";
 
 interface PhanHoi {
   id: number;
@@ -55,6 +56,10 @@ export default function PhongTroPhanHoiList() {
       <h1 className="flex justify-center items-center text-green-500 text-4xl mt-3 mb-3 text-underline">
         DANH SÁCH PHẢN HỒI PHÒNG TRỌ
       </h1>
+      {/* <div className="p-4">
+        <h1 className="text-xl font-bold mb-4">Chuông thông báo</h1>
+        <NotificationBell />
+      </div> */}
       <Table>
         <TableCaption className="text-white"></TableCaption>
         <TableHeader>

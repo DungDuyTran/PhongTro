@@ -2,6 +2,7 @@
 
 import React from "react";
 import { Menu, Bell, Sun } from "lucide-react";
+import NotificationBell from "@/app/components/NotificationBell";
 
 interface TopHeaderProps {
   onToggleSidebar: () => void;
@@ -20,10 +21,9 @@ const TopHeader: React.FC<TopHeaderProps> = ({ onToggleSidebar }) => {
           </a>
         </span>
         <span>
-          <a href="#">
-            <Bell className=" w-6 h-6 text-green-600" />
-          </a>
+          <NotificationBell />
         </span>
+
         <a href="#">
           <img src="/anh1.jpg" alt="avatar" className="w-9 h-9 rounded-full " />
         </a>
