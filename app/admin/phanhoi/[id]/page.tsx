@@ -1,4 +1,3 @@
-// --- FILE: app/admin/phan-hoi/[id]/page.tsx ---
 import { notFound } from "next/navigation";
 import prisma from "@/lib/db";
 
